@@ -9,10 +9,11 @@ namespace storage
 {
 
 StorageConfig::StorageConfig(const boost::filesystem::path &base)
-    : ram_index_path{base.string() + ".ramIndex"}, file_index_path{base.string() + ".fileIndex"},
-      hsgr_data_path{base.string() + ".hsgr"}, nodes_data_path{base.string() + ".nodes"},
-      edges_data_path{base.string() + ".edges"}, core_data_path{base.string() + ".core"},
-      geometries_path{base.string() + ".geometry"}, timestamp_path{base.string() + ".timestamp"},
+    : base{base.string()}, ram_index_path{base.string() + ".ramIndex"},
+      file_index_path{base.string() + ".fileIndex"}, hsgr_data_path{base.string() + ".hsgr"},
+      nodes_data_path{base.string() + ".nodes"}, edges_data_path{base.string() + ".edges"},
+      core_data_path{base.string() + ".core"}, geometries_path{base.string() + ".geometry"},
+      timestamp_path{base.string() + ".timestamp"},
       datasource_names_path{base.string() + ".datasource_names"},
       datasource_indexes_path{base.string() + ".datasource_indexes"},
       names_data_path{base.string() + ".names"}, properties_path{base.string() + ".properties"},
@@ -23,8 +24,9 @@ StorageConfig::StorageConfig(const boost::filesystem::path &base)
 
 bool StorageConfig::IsValid() const
 {
-    const constexpr auto num_files = 13;
-    const boost::filesystem::path paths[num_files] = {ram_index_path,
+    const constexpr auto num_files = 14;
+    const boost::filesystem::path paths[num_files] = {base,
+                                                      ram_index_path,
                                                       file_index_path,
                                                       hsgr_data_path,
                                                       nodes_data_path,

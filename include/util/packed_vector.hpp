@@ -12,6 +12,27 @@ namespace osrm
 namespace util
 {
 
+const constexpr std::size_t BITSIZE = 33;
+const constexpr std::size_t ELEMSIZE = 64;
+const constexpr std::size_t PACKSIZE = BITSIZE * ELEMSIZE;
+
+/**
+ * Returns the size of the packed vector datastructure with `elements` packed elements (the size of
+ * its underlying vector)
+ */
+inline std::size_t PackedVectorSize(std::size_t elements)
+{
+    return ceil(float(elements) / ELEMSIZE) * BITSIZE;
+};
+
+/**
+ * Returns the capacity of a packed vector with underlying vector size `vec_size`
+ */
+inline std::size_t PackedVectorCapacity(std::size_t vec_size)
+{
+    return floor(float(vec_size) / BITSIZE) * ELEMSIZE;
+}
+
 /**
  * Since OSM node IDs are (at the time of writing) not quite yet overflowing 32 bits, and
  * will predictably be containable within 33 bits for a long time, the following packs

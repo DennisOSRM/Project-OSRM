@@ -1,6 +1,5 @@
 #ifndef SHARED_MEMORY_HPP
 #define SHARED_MEMORY_HPP
-
 #include "util/exception.hpp"
 #include "util/simple_logger.hpp"
 

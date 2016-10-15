@@ -68,6 +68,7 @@ struct EngineConfig final
     int max_locations_map_matching = -1;
     int max_results_nearest = -1;
     bool use_shared_memory = true;
+    bool use_isochrone = true;
 };
 }
 }

@@ -3,6 +3,7 @@
 #include "engine/engine_config.hpp"
 #include "engine/status.hpp"
 
+#include "engine/plugins/isochrone.hpp"
 #include "engine/plugins/match.hpp"
 #include "engine/plugins/nearest.hpp"
 #include "engine/plugins/table.hpp"
@@ -97,6 +98,10 @@ Engine::Engine(const EngineConfig &config)
     trip_plugin = std::make_unique<TripPlugin>(config.max_locations_trip);
     match_plugin = std::make_unique<MatchPlugin>(config.max_locations_map_matching);
     tile_plugin = std::make_unique<TilePlugin>();
+    if (config.use_isochrone)
+    {
+        isochrone_plugin = std::make_unique<IsochronePlugin>(config.storage_config.base.string());
+    }
 }
 
 // make sure we deallocate the unique ptr at a position where we know the size of the plugins
@@ -132,6 +137,10 @@ Status Engine::Match(const api::MatchParameters &params, util::json::Object &res
 Status Engine::Tile(const api::TileParameters &params, std::string &result) const
 {
     return RunQuery(lock, query_data_facade, params, *tile_plugin, result);
+}
+Status Engine::Isochrone(const api::IsochroneParameters &params, util::json::Object &result) const
+{
+    return RunQuery(lock, query_data_facade, params, *isochrone_plugin, result);
 }
 
 } // engine ns

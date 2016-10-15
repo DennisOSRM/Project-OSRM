@@ -64,7 +64,8 @@ inline unsigned generateServerProgramOptions(const int argc,
                                              int &max_locations_viaroute,
                                              int &max_locations_distance_table,
                                              int &max_locations_map_matching,
-                                             int &max_results_nearest)
+                                             int &max_results_nearest,
+      					     bool &use_isochrone)
 {
     using boost::program_options::value;
     using boost::filesystem::path;
@@ -90,6 +91,9 @@ inline unsigned generateServerProgramOptions(const int argc,
         ("shared-memory,s",
          value<bool>(&use_shared_memory)->implicit_value(true)->default_value(false),
          "Load data from shared memory") //
+        ("isochrone,I",
+         value<bool>(&use_isochrone)->implicit_value(true)->default_value(false),
+         "Load the isochrone plugin") //
         ("max-viaroute-size",
          value<int>(&max_locations_viaroute)->default_value(500),
          "Max. locations supported in viaroute query") //
@@ -194,7 +198,8 @@ int main(int argc, const char *argv[]) try
                                                               config.max_locations_viaroute,
                                                               config.max_locations_distance_table,
                                                               config.max_locations_map_matching,
-                                                              config.max_results_nearest);
+                                                              config.max_results_nearest,
+                                                              config.use_isochrone);
     if (init_result == INIT_OK_DO_NOT_START_ENGINE)
     {
         return EXIT_SUCCESS;
