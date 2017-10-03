@@ -46,6 +46,7 @@ struct LuaScriptingContext final
 
     int api_version;
     sol::table profile_table;
+    std::vector<std::string> node_tags_requiring_processing;
 };
 
 /**

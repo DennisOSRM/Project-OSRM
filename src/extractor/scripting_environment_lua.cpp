@@ -544,6 +544,16 @@ void Sol2ScriptingEnvironment::InitContext(LuaScriptingContext &context)
         context.has_way_function = context.way_function.valid();
         context.has_segment_function = context.segment_function.valid();
 
+        // fetch list of tags requiring node processing
+        sol::table node_tags_table = context.profile_table["node_tags_requiring_processing"];
+        if (node_tags_table.valid())
+        {
+            for (auto &&pair : node_tags_table)
+            {
+                context.node_tags_requiring_processing.push_back(pair.second.as<std::string>());
+            };
+        }
+
         // read properties from 'profile.properties' table
         sol::table properties = context.profile_table["properties"];
         if (properties.valid())
@@ -962,8 +972,28 @@ void LuaScriptingContext::ProcessNode(const osmium::Node &node,
         node_function(profile_table, node, result, relations);
         break;
     case 2:
-        node_function(profile_table, node, result);
+    {
+        bool process = false;
+
+        if (node_tags_requiring_processing.empty())
+            process = true;
+        else
+        {
+            for (auto &&tag : node_tags_requiring_processing)
+            {
+                auto v = node.get_value_by_key(tag.c_str());
+                if (v && *v)
+                {
+                    process = true;
+                    break;
+                }
+            }
+        }
+
+        if (process)
+            node_function(profile_table, node, result);
         break;
+    }
     case 1:
     case 0:
         node_function(node, result);
