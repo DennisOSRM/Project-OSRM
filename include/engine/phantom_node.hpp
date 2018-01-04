@@ -127,6 +127,23 @@ struct PhantomNode
 
     bool operator==(const PhantomNode &other) const { return location == other.location; }
 
+    bool IsIndistinct(const PhantomNode &other) const
+    {
+        if (forward_segment_id.enabled && other.forward_segment_id.enabled &&
+            forward_segment_id.id == other.forward_segment_id.id &&
+            GetForwardWeightPlusOffset() == other.GetForwardWeightPlusOffset())
+        {
+            return true;
+        }
+        if (reverse_segment_id.enabled && other.reverse_segment_id.enabled &&
+            reverse_segment_id.id == other.reverse_segment_id.id &&
+            GetReverseWeightPlusOffset() == other.GetReverseWeightPlusOffset())
+        {
+            return true;
+        }
+        return false;
+    }
+
     template <class OtherT>
     explicit PhantomNode(const OtherT &other,
                          ComponentID component,

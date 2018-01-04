@@ -144,7 +144,6 @@ SubMatchingList mapMatching(SearchEngineData<Algorithm> &engine_working_data,
     prev_unbroken_timestamps.push_back(initial_timestamp);
     for (auto t = initial_timestamp + 1; t < candidates_list.size(); ++t)
     {
-
         const auto step_time = [&] {
             if (use_timestamps)
             {
@@ -220,26 +219,32 @@ SubMatchingList mapMatching(SearchEngineData<Algorithm> &engine_working_data,
                         continue;
                     }
 
-                    double network_distance =
-                        getNetworkDistance(engine_working_data,
-                                           facade,
-                                           forward_heap,
-                                           reverse_heap,
-                                           prev_unbroken_timestamps_list[s].phantom_node,
-                                           current_timestamps_list[s_prime].phantom_node,
-                                           weight_upper_bound);
-
-                    // get distance diff between loc1/2 and locs/s_prime
-                    const auto d_t = std::abs(network_distance - haversine_distance);
-
-                    // very low probability transition -> prune
-                    if (d_t >= max_distance_delta)
+                    PhantomNode prev_node = prev_unbroken_timestamps_list[s].phantom_node;
+                    double network_distance = 0;
+                    // do not calculate transition probability in case without movement
+                    if (!current_timestamps_list[s_prime].phantom_node.IsIndistinct(prev_node))
                     {
-                        continue;
-                    }
+                        network_distance =
+                            getNetworkDistance(engine_working_data,
+                                               facade,
+                                               forward_heap,
+                                               reverse_heap,
+                                               prev_node,
+                                               current_timestamps_list[s_prime].phantom_node,
+                                               weight_upper_bound);
 
-                    const double transition_pr = transition_log_probability(d_t);
-                    new_value += transition_pr;
+                        // get distance diff between loc1/2 and locs/s_prime
+                        const auto d_t = std::abs(network_distance - haversine_distance);
+
+                        // very low probability transition -> prune
+                        if (d_t >= max_distance_delta)
+                        {
+                            continue;
+                        }
+
+                        const double transition_pr = transition_log_probability(d_t);
+                        new_value += transition_pr;
+                    }
 
                     if (new_value > current_viterbi[s_prime])
                     {
@@ -387,13 +392,20 @@ SubMatchingList mapMatching(SearchEngineData<Algorithm> &engine_working_data,
         auto trace_distance = 0.0;
         matching.nodes.reserve(reconstructed_indices.size());
         matching.indices.reserve(reconstructed_indices.size());
+        const PhantomNode *previous_node = nullptr;
         for (const auto &idx : reconstructed_indices)
         {
             const auto timestamp_index = idx.first;
             const auto location_index = idx.second;
 
-            matching.indices.push_back(timestamp_index);
+            matching.indices.push_back((unsigned)timestamp_index);
             matching.nodes.push_back(candidates_list[timestamp_index][location_index].phantom_node);
+            if (previous_node != nullptr && matching.nodes.back().IsIndistinct(*previous_node))
+            {
+                matching.nodes.back().location = previous_node->location;
+            }
+            previous_node = &matching.nodes.back();
+
             auto const routes_count =
                 std::accumulate(model.viterbi_reachable[timestamp_index].begin(),
                                 model.viterbi_reachable[timestamp_index].end(),
