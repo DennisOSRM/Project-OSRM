@@ -2,6 +2,7 @@
 #define NEAREST_HPP
 
 #include "engine/api/nearest_parameters.hpp"
+#include "engine/api/nearest_result.hpp"
 #include "engine/datafacade/contiguous_internalmem_datafacade.hpp"
 #include "engine/plugins/plugin_base.hpp"
 #include "engine/routing_algorithms.hpp"
@@ -19,11 +20,15 @@ class NearestPlugin final : public BasePlugin
   public:
     explicit NearestPlugin(const int max_results);
 
+    // to remove in v6.0
     Status HandleRequest(const RoutingAlgorithmsInterface &algorithms,
                          const api::NearestParameters &params,
                          util::json::Object &result) const;
 
-  private:
+    MaybeResult<api::NearestResult> HandleRequest(const RoutingAlgorithmsInterface &algorithms,
+                                                  const api::NearestParameters &params) const;
+
+ private:
     const int max_results;
 };
 }
