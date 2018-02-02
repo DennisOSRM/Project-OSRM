@@ -43,6 +43,7 @@ Feature: Turn Function Information
         end
 
         function print_turn (profile, turn)
+          print ('is_stop ' .. string.format("%s", tostring(turn.is_stop)))
           print ('source_restricted ' .. string.format("%s", tostring(turn.source_restricted)))
           print ('source_is_motorway ' .. string.format("%s", tostring(turn.source_is_motorway)))
           print ('source_is_link ' .. string.format("%s", tostring(turn.source_is_link)))
@@ -173,4 +174,67 @@ Feature: Turn Function Information
 
 
 
+    Scenario: Turns should show if intersection node is tagged with highway=stop stop=all
+        Given the node map
+            """
+            a->b->c
+            """
+        And the ways
+            | nodes | oneway |
+            | ab    | yes    |
+            | bc    | yes    |
+        And the nodes
+            | node | highway | stop |
+            | b    | stop    | all  |
+
+        And the data has been saved to disk
+
+        When I run "osrm-extract --profile {profile_file} {osm_file}"
+        Then it should exit successfully
+        And stdout should contain "is_stop true"
+
+
+    Scenario: Turns should not claim there is stop if there is not
+        Given the node map
+            """
+            a-b-c
+            """
+        And the ways
+            | nodes | oneway |
+            | ab    | yes    |
+            | bc    | yes    |
+        And the nodes
+            | node | highway |
+            | b    | -    |
+
+        And the data has been saved to disk
+
+        When I run "osrm-extract --profile {profile_file} {osm_file}"
+        Then it should exit successfully
+        And stdout should contain "is_stop false"
+
+
+    Scenario: Turn should show correct stops if intersection node is tagged with highway=stop stop=minor
+        Given the node map
+            """
+               d
+               |
+               v
+            a->b->c
+            """
+        And the ways
+            | nodes | oneway | highway  |
+            | ab    | yes    | primary  |
+            | bc    | yes    | primary  |
+            | db    | yes    | tertiary |
+        And the nodes
+            | node | highway | stop  |
+            | b    | stop    | minor |
+
+        And the data has been saved to disk
+
+        When I run "osrm-extract --profile {profile_file} {osm_file}"
+        Then it should exit successfully
+        And stdout should contain "is_stop true"
+        And stdout should contain "is_stop false"
 
