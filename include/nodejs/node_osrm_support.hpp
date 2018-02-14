@@ -65,7 +65,23 @@ inline void ParseResult(const osrm::Status &result_status, osrm::json::Object &r
 
     if (result_status == osrm::Status::Error)
     {
-        throw std::logic_error(code_iter->second.get<osrm::json::String>().value.c_str());
+        const auto message_iter = result.values.find("message");
+        if (message_iter != end_iter)
+        {
+            // Concatenate the code: message so we don't lose details on errors
+            const auto code = code_iter->second.get<osrm::json::String>().value.c_str();
+            const auto message = message_iter->second.get<osrm::json::String>().value.c_str();
+            auto buffer =
+                std::make_unique<char[]>(std::strlen(code) + 2 + std::strlen(message) + 1);
+            std::strcpy(buffer.get(), code);
+            std::strcat(buffer.get(), ": ");
+            std::strcat(buffer.get(), message);
+            throw std::logic_error(buffer.get());
+        }
+        else
+        {
+            throw std::logic_error(code_iter->second.get<osrm::json::String>().value.c_str());
+        }
     }
 
     result.values.erase(code_iter);
