@@ -11,6 +11,8 @@
       - CHANGED: Increase PackedOSMIDs size to 34 bits. This breaks the **data format** [#6020](https://github.com/Project-OSRM/osrm-backend/issues/6020)
     - Profile:
       - FIXED: Add kerb barrier exception to default car profile. [#5999](https://github.com/Project-OSRM/osrm-backend/pull/5999)
+    - Features
+      - FIXED: Completed support for no_entry and no_exit turn restrictions. [#5988](https://github.com/Project-OSRM/osrm-backend/pull/5988)
 
 # 5.24.0
   - Changes from 5.23.0
